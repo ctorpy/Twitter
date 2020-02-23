@@ -1,7 +1,7 @@
 #! /usr/bin/python
 '''
 Starts a listener for tweets containing a list of hash tags.
-Publish tweets containing hash tag 
+Publish tweets containing hash tags to pub/sub.
 '''
 
 # coding: utf-8
@@ -20,16 +20,13 @@ import logging
 #store all the certificcations in another privtae file
 from twitter_cert import *
 
-
 # Config pub/sub
 publisher = pubsub_v1.PublisherClient()
-
-# config pub/sub
 project_id = "twitter-268909"
 topic_name="cloud_tweets"
 topic_path = publisher.topic_path(project_id, topic_name)
 
-# Method to push messages to pubsub
+# Method to push messages to pub/sub
 def write_to_pubsub(tweet_data):
     try:
         if tweet_data["lang"] == "en":
@@ -42,13 +39,11 @@ def write_to_pubsub(tweet_data):
             print('tweet published {}'.format(tweet_data['text']))    
     except Exception as e:
         raise
-
+#the listneer
 class TwritterListener(StreamListener):
     def on_data(self,data):
         try:
-            j_data=json.loads(data)
-            #print(j_data.keys())
-            write_to_pubsub(j_data)
+            write_to_pubsub(son.loads(data))
         except BaseException as ex:
             logging.error('Error publishing tweet - {}'.format(str(ex)))
         return True
@@ -56,7 +51,6 @@ class TwritterListener(StreamListener):
         logging.error('Error publishing tweet - {}'.format(str(status)))
  
 #start the listener
-
 listener=TwritterListener()
 auth = OAuthHandler(consumer_key,consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
